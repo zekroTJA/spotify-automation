@@ -20,8 +20,12 @@ impl Redis {
         Ok(Redis { client })
     }
 
-    pub fn from_env() -> Result<Self> {
-        let uri = from_env!("KV_URL")?;
+    pub fn from_env(ensure_tls: bool) -> Result<Self> {
+        let mut uri = from_env!("KV_URL")?;
+        // TODO: Maybe handle this with an extra env var like REDIS_ENSURE_TLS or so.
+        if ensure_tls && uri.starts_with("redis://") {
+            uri = format!("rediss://{}", &uri[8..])
+        }
         Redis::new(&uri)
     }
 

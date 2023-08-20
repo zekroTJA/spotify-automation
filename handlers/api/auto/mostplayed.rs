@@ -10,7 +10,7 @@ async fn main() -> Result<(), Error> {
 
 pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
     let controller = expect!(UnauthorizedController::from_env());
-    let db = expect!(Redis::from_env());
+    let db = expect!(Redis::from_env(true));
 
     let refresh_token = expect!(
         expect!(db.get("spotify_automation_refresh_token")),
