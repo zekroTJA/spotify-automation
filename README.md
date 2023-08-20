@@ -49,3 +49,11 @@ echo "https://my-spotify-automation.vercel.app/api/oauth/callback" \
 Finally, you might need to re-deploy the production application to apply the environment variables to the nevironment.
 
 When everything is set up correctly, you should be able to navigate to the `/api/oauth/login` endpoint and authorize with your Spotify account. This requests a refresh authorization token which is then stored in the Vercel KV database. After that, calling the endpoint `/api/auto/mostplayed` will create a Playlist with the name `Current Top Songs` containing your latest most played songs which is automatically updated every day by a CRON-job.
+
+## Ideas
+
+Some Ideas which could be implemented into this project in the future if I am bored again.
+
+- [ ] Add query params to `/api/auto/mostplayed` like `playlist_name` or `timespan`
+- [ ] Add proper handling when the created playlist is deleted
+- [ ] Add automation to store all songs in the "Discover Weekly" playlist into one large archival playlist
