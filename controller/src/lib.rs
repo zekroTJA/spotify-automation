@@ -38,8 +38,6 @@ impl UnauthorizedController {
             redirect_uri,
             scopes: scopes!(
                 "user-top-read",
-                "user-read-recently-played",
-                "user-read-private",
                 "playlist-modify-public",
                 "playlist-modify-private"
             ),
