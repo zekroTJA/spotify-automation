@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "public": false,
+
+  "functions": {
+    "api/**/*.rs": {
+      "runtime": "vercel-rust@4.0.5"
+    }
+  },
+
+  "crons": [
+    {
+      "path": "/api/auto/mostplayed",
+      "schedule": "4 20 * * *"
+    }
+  ]
+}

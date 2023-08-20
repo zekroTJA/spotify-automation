@@ -1,0 +1,26 @@
+[package]
+name = "my-vercel-api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+controller = { path = "../controller" }
+vercel-utils = { path = "../vercel-utils" }
+persistence = { path = "../persistence" }
+tokio = { version = "1", features = ["macros"] }
+serde_json = { version = "1", features = ["raw_value"] }
+# Documentation: https://docs.rs/vercel_runtime/latest/vercel_runtime
+vercel_runtime = { version = "1.0.2" }
+
+# Each handler has to be specified as [[bin]]
+[[bin]]
+name = "login"
+path = "api/oauth/login.rs"
+
+[[bin]]
+name = "callback"
+path = "api/oauth/callback.rs"
+
+[[bin]]
+name = "mostplayed"
+path = "api/auto/mostplayed.rs"
