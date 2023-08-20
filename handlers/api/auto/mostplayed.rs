@@ -35,5 +35,5 @@ pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
 
     Ok(Response::builder()
         .status(StatusCode::OK)
-        .body(Body::Empty)?)
+        .body(Body::Text(format!("updated playlist with id {id}")))?)
 }
