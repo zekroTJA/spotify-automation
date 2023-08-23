@@ -31,8 +31,6 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 
     let playlist_id = expect!(db.get(&store_key));
 
-    dbg!(&time_range);
-
     let id = expect!(
         controller
             .update_top_songs_playlist(
