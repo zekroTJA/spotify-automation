@@ -8,7 +8,7 @@ use rspotify::{
     prelude::{BaseClient, OAuthClient, PlayableId},
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
-use std::env;
+use std::{env, str::FromStr};
 
 macro_rules! from_env {
     ($name:literal) => {
@@ -103,10 +103,8 @@ impl AuthorizedController {
         token.refresh_token.ok_or(Error::NoAuthToken)
     }
 
-    pub async fn get_top_songs(&self) -> Result<Vec<FullTrack>> {
-        let top_tracks = self
-            .client
-            .current_user_top_tracks(Some(TimeRange::ShortTerm));
+    pub async fn get_top_songs(&self, time_range: Option<TimeRange>) -> Result<Vec<FullTrack>> {
+        let top_tracks = self.client.current_user_top_tracks(time_range);
 
         let tracks: std::result::Result<Vec<_>, _> = top_tracks.try_collect().await;
 
@@ -150,18 +148,21 @@ impl AuthorizedController {
         Ok(())
     }
 
-    pub async fn update_top_songs_playlist<'a>(
+    pub async fn update_top_songs_playlist<'a, T: AsRef<str>>(
         &'a self,
         id: Option<&'a str>,
         name: &str,
+        time_range: Option<T>,
     ) -> Result<PlaylistId> {
+        let time_range = time_range.map(time_range_from_str).transpose()?;
+
         let playlist_id: PlaylistId<'a> = match id {
             Some(id) => PlaylistId::from_id_or_uri(id)?,
             None => self.create_playlist(name, None).await?.id,
         };
 
         let top_songs = self
-            .get_top_songs()
+            .get_top_songs(time_range)
             .await?
             .iter()
             .cloned()
@@ -172,5 +173,14 @@ impl AuthorizedController {
         self.update_playlist(playlist_id.clone(), top_songs).await?;
 
         Ok(playlist_id)
+    }
+}
+
+fn time_range_from_str<T: AsRef<str>>(v: T) -> Result<TimeRange> {
+    match v.as_ref() {
+        "long" => Ok(TimeRange::LongTerm),
+        "medium" => Ok(TimeRange::MediumTerm),
+        "short" => Ok(TimeRange::ShortTerm),
+        _ => Err(Error::InvalidTimeRange),
     }
 }

@@ -10,7 +10,7 @@
 
   "crons": [
     {
-      "path": "/api/auto/mostplayed",
+      "path": "/api/auto/mostplayed?time_range=medium",
       "schedule": "4 20 * * *"
     }
   ]

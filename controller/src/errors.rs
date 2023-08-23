@@ -18,4 +18,7 @@ pub enum Error {
 
     #[error("spotify id error: {0}")]
     SpotifyId(#[from] rspotify::model::IdError),
+
+    #[error("invalid time range")]
+    InvalidTimeRange,
 }

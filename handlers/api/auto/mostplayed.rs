@@ -1,14 +1,17 @@
 use controller::UnauthorizedController;
 use persistence::Redis;
 use vercel_runtime::{http, run, Body, Error, Request, Response, StatusCode};
-use vercel_utils::expect;
+use vercel_utils::{expect, get_query_param};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     run(handler).await
 }
 
-pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
+pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
+    let time_range = expect!(get_query_param(&req, "time_range"));
+    let name = expect!(get_query_param(&req, "name"));
+
     let controller = expect!(UnauthorizedController::from_env());
     let db = expect!(Redis::from_env(true));
 
@@ -25,7 +28,11 @@ pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
 
     let id = expect!(
         controller
-            .update_top_songs_playlist(playlist_id.as_deref(), "Current Top Songs")
+            .update_top_songs_playlist(
+                playlist_id.as_deref(),
+                name.as_deref().unwrap_or("Current Top Songs"),
+                time_range
+            )
             .await
     );
 
