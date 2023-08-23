@@ -10,16 +10,8 @@
 
   "crons": [
     {
-      "path": "/api/auto/mostplayed?time_range=short&name=Current%20Top%20Songs%20(Short%20Term)",
+      "path": "/api/auto/mostplayed?time_ranges=short,medium,long&name=Current%20Top%20Songs",
       "schedule": "20 4 * * *"
-    },
-    {
-      "path": "/api/auto/mostplayed?time_range=medium&name=Current%20Top%20Songs%20(Medium%20Term)",
-      "schedule": "25 4 * * *"
-    },
-    {
-      "path": "/api/auto/mostplayed?time_range=long&name=Current%20Top%20Songs%20(Long%20Term)",
-      "schedule": "30 4 * * *"
     }
   ]
 }
