@@ -8,7 +8,7 @@ use rspotify::{
     prelude::{BaseClient, OAuthClient, PlayableId},
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
-use std::{env, str::FromStr};
+use std::env;
 
 macro_rules! from_env {
     ($name:literal) => {

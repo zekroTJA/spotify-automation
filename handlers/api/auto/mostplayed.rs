@@ -24,7 +24,14 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 
     let controller = expect!(controller.authorize_with_token(refresh_token).await);
 
-    let playlist_id = expect!(db.get("spotify_automation_playlist_id"));
+    let store_key = format!(
+        "spotify_automation_playlist_id:{}",
+        time_range.as_deref().unwrap_or("unspecified")
+    );
+
+    let playlist_id = expect!(db.get(&store_key));
+
+    dbg!(&time_range);
 
     let id = expect!(
         controller
@@ -37,7 +44,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     );
 
     if playlist_id.is_none() {
-        expect!(db.set("spotify_automation_playlist_id", &id.to_string()));
+        expect!(db.set(&store_key, &id.to_string()));
     }
 
     Ok(Response::builder()
