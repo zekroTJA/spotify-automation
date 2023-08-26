@@ -12,10 +12,6 @@
     {
       "path": "/api/auto/mostplayed?time_ranges=short,medium,long&name=Current%20Top%20Songs",
       "schedule": "20 4 * * *"
-    },
-    {
-      "path": "/api/auto/dwa?dw_name=Discover%20Weekly&dwa_name=Discover%20Weekly%20Archive",
-      "schedule": "9 6 * * 2"
     }
   ]
 }
