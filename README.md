@@ -1,6 +1,10 @@
 # Spotify Automations
 
-A small Vercel application to automatically create and update a Spotify playlist which contains your latest most listened tracks.
+A small Vercel application to automate some stuff in Spotify.
+
+Currently, this app can do the following stuff.
+- Create playlists containing your recently most played songs *(variants for short, medium and long term)* [`/api/auto/mostplayed`].
+- Archive the contents of your "Discover Weekly" playlist in a separate archival playlist [`/api/auto/dwa`].
 
 ## Setup
 
@@ -49,6 +53,19 @@ echo "https://my-spotify-automation.vercel.app/api/oauth/callback" \
 Finally, you might need to re-deploy the production application to apply the environment variables to the nevironment.
 
 When everything is set up correctly, you should be able to navigate to the `/api/oauth/login` endpoint and authorize with your Spotify account. This requests a refresh authorization token which is then stored in the Vercel KV database. After that, calling the endpoint `/api/auto/mostplayed` will create a Playlist with the name `Current Top Songs` containing your latest most played songs which is automatically updated every day by a CRON-job.
+
+## Limitations
+
+This project makes use of [Vercel cron jobs](https://vercel.com/docs/cron-jobs), which are currently in beta. In the free tier, you are only able to create a maximum of 2 cron jobs. Also, [according to the documentation](https://vercel.com/docs/cron-jobs#are-cron-jobs-free), cron jobs are only free during the beta phase.
+
+But heads up, you have some options to bypass these limitations.
+
+If you have an own server (Home Server, RaspberryPi, VPS, ...), simply create the cron jobs there calling the public API. Here a small example.
+```
+0 1 * * TUE curl -L -X GET 'https://my-spotify-automations.vercel.app/api/auto/dwa?dw_name=Discover%20Weekly&dwa_name=Discover%20Weekly%20Archive'
+```
+
+Alternatively, you can also use automation services like [IFTTT](https://ifttt.com/) or [Make](https://make.com/). [Here](contrib/make/blueprint.json), you can find an example template for the latter.
 
 ## Ideas
 
