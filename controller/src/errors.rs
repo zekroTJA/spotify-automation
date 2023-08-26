@@ -19,6 +19,12 @@ pub enum Error {
     #[error("spotify id error: {0}")]
     SpotifyId(#[from] rspotify::model::IdError),
 
+    #[error("database error: {0}")]
+    Database(#[from] persistence::errors::Error),
+
     #[error("invalid time range")]
     InvalidTimeRange,
+
+    #[error("no authorization token has been stored before")]
+    NoTokenStored,
 }

@@ -18,12 +18,14 @@ macro_rules! expect {
         }
     };
 
-    ($expression:expr, $pattern:pat_param => $bail:expr) => {
+    ($expression:expr, $( $pattern:pat_param $(if $guard:expr)? => $bail:expr),* ) => {
         match $expression {
             Ok(v) => v,
-            $pattern => {
-                return $bail;
-            }
+            $(
+                $pattern $(if $guard)? => {
+                    return $bail;
+                }
+            )*
         }
     };
 }

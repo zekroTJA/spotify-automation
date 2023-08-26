@@ -3,6 +3,7 @@ pub mod errors;
 use self::errors::Error;
 use errors::Result;
 use futures::stream::TryStreamExt;
+use persistence::KV;
 use rspotify::{
     model::{FullPlaylist, FullTrack, PlaylistId, TimeRange},
     prelude::{BaseClient, OAuthClient, PlayableId},
@@ -10,26 +11,32 @@ use rspotify::{
 };
 use std::env;
 
+const DBKEY_REFRESH_TOKEN: &str = "spotify_automation_refresh_token";
+const DBKEY_PLAYLIST_MOSTPLAYED_PREFIX: &str = "spotify_automation_playlist_id";
+
 macro_rules! from_env {
     ($name:literal) => {
         env::var($name).map_err(|err| Error::EnvVar { name: $name, err })
     };
 }
 
-pub struct UnauthorizedController {
+pub struct UnauthorizedController<DB: KV> {
     client: AuthCodeSpotify,
+    db: DB,
 }
 
-pub struct AuthorizedController {
+pub struct AuthorizedController<DB: KV> {
     client: AuthCodeSpotify,
+    db: DB,
 }
 
-impl UnauthorizedController {
+impl<DB: KV> UnauthorizedController<DB> {
     pub fn new(
         client_id: &str,
         client_secret: &str,
         redirect_uri: String,
-    ) -> UnauthorizedController {
+        db: DB,
+    ) -> UnauthorizedController<DB> {
         let config = Config {
             ..Default::default()
         };
@@ -47,10 +54,10 @@ impl UnauthorizedController {
         let creds = Credentials::new(client_id, client_secret);
         let client = AuthCodeSpotify::with_config(creds, oauth, config);
 
-        UnauthorizedController { client }
+        UnauthorizedController { client, db }
     }
 
-    pub fn from_env() -> Result<UnauthorizedController> {
+    pub fn from_env(db: DB) -> Result<UnauthorizedController<DB>> {
         let client_id = from_env!("SPOTIFY_CLIENTID")?;
         let client_secret = from_env!("SPOTIFY_CLIENTSECRET")?;
         let redirect_uri = from_env!("REDIRECT_URL")?;
@@ -58,6 +65,7 @@ impl UnauthorizedController {
             &client_id,
             &client_secret,
             redirect_uri,
+            db,
         ))
     }
 
@@ -65,15 +73,16 @@ impl UnauthorizedController {
         Ok(self.client.get_authorize_url(true)?)
     }
 
-    pub async fn authorize_with_code(self, code: &str) -> Result<AuthorizedController> {
+    pub async fn authorize_with_code(self, code: &str) -> Result<AuthorizedController<DB>> {
         self.client.request_token(code).await?;
 
         Ok(AuthorizedController {
             client: self.client,
+            db: self.db,
         })
     }
 
-    pub async fn authorize_with_token(self, token: String) -> Result<AuthorizedController> {
+    pub async fn authorize_with_token(self, token: String) -> Result<AuthorizedController<DB>> {
         let token = Token {
             refresh_token: Some(token),
             ..Default::default()
@@ -90,17 +99,32 @@ impl UnauthorizedController {
 
         Ok(AuthorizedController {
             client: self.client,
+            db: self.db,
         })
+    }
+
+    pub async fn authorize_from_db(self) -> Result<AuthorizedController<DB>> {
+        let Some(token) = self.db.get(DBKEY_REFRESH_TOKEN)? else {
+            return Err(Error::NoAuthToken);
+        };
+
+        self.authorize_with_token(token).await
     }
 }
 
-impl AuthorizedController {
+impl<DB: KV> AuthorizedController<DB> {
     pub async fn refresh_token(&self) -> Result<String> {
         let token = self.client.get_token();
         let token = token.lock().await.map_err(|_| Error::LockPoisoned)?;
         let token = token.to_owned().ok_or(Error::NoAuthToken)?;
 
         token.refresh_token.ok_or(Error::NoAuthToken)
+    }
+
+    pub async fn store_token(&self) -> Result<()> {
+        let token = self.refresh_token().await?;
+        self.db.set(DBKEY_REFRESH_TOKEN, token)?;
+        Ok(())
     }
 
     pub async fn get_top_songs(&self, time_range: Option<TimeRange>) -> Result<Vec<FullTrack>> {
@@ -174,6 +198,34 @@ impl AuthorizedController {
 
         Ok(playlist_id)
     }
+
+    pub async fn update_mostplayed_playlists<I, E, N>(
+        &self,
+        time_ranges: I,
+        name_prefix: N,
+    ) -> Result<Vec<String>>
+    where
+        I: Iterator<Item = E>,
+        E: AsRef<str>,
+        N: AsRef<str>,
+    {
+        let mut ids = Vec::with_capacity(3);
+
+        for time_range in time_ranges {
+            let time_range = time_range.as_ref();
+            let store_key = format!("{}:{}", DBKEY_PLAYLIST_MOSTPLAYED_PREFIX, time_range);
+            let playlist_id = self.db.get(store_key)?;
+            let playlist_name = format!("{} ({} Term)", name_prefix.as_ref(), title(time_range));
+
+            let id = self
+                .update_top_songs_playlist(playlist_id.as_deref(), &playlist_name, Some(time_range))
+                .await?;
+
+            ids.push(id.to_string());
+        }
+
+        Ok(ids)
+    }
 }
 
 fn time_range_from_str<T: AsRef<str>>(v: T) -> Result<TimeRange> {
@@ -183,4 +235,12 @@ fn time_range_from_str<T: AsRef<str>>(v: T) -> Result<TimeRange> {
         "short" => Ok(TimeRange::ShortTerm),
         _ => Err(Error::InvalidTimeRange),
     }
+}
+
+fn title(v: &str) -> String {
+    if v.is_empty() {
+        return "".into();
+    }
+    let first = v.chars().next().unwrap().to_uppercase();
+    format!("{first}{}", &v[1..])
 }
