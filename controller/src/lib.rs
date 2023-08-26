@@ -5,7 +5,7 @@ use errors::Result;
 use futures::stream::TryStreamExt;
 use persistence::KV;
 use rspotify::{
-    model::{FullPlaylist, FullTrack, PlaylistId, TimeRange},
+    model::{FullPlaylist, FullTrack, PlaylistId, SimplifiedPlaylist, TimeRange},
     prelude::{BaseClient, OAuthClient, PlayableId},
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
@@ -13,6 +13,9 @@ use std::env;
 
 const DBKEY_REFRESH_TOKEN: &str = "spotify_automation_refresh_token";
 const DBKEY_PLAYLIST_MOSTPLAYED_PREFIX: &str = "spotify_automation_playlist_id";
+
+const DBKEY_PLAYLIST_DISCOVERWEEKLY: &str = "spotify_automation_dw_playlist_id";
+const DBKEY_PLAYLIST_DISCOVERWEEKLYARCHIVE: &str = "spotify_automation_dwa_playlist_id";
 
 macro_rules! from_env {
     ($name:literal) => {
@@ -45,6 +48,7 @@ impl<DB: KV> UnauthorizedController<DB> {
             redirect_uri,
             scopes: scopes!(
                 "user-top-read",
+                "playlist-read-private",
                 "playlist-modify-public",
                 "playlist-modify-private"
             ),
@@ -225,6 +229,85 @@ impl<DB: KV> AuthorizedController<DB> {
         }
 
         Ok(ids)
+    }
+
+    pub async fn find_playlist<P>(&self, preticate: P) -> Result<SimplifiedPlaylist>
+    where
+        P: FnMut(&&SimplifiedPlaylist) -> bool + Copy,
+    {
+        let mut offset = 0;
+        const PAGE_SIZE: u32 = 50;
+
+        loop {
+            let playlists = self
+                .client
+                .current_user_playlists_manual(Some(PAGE_SIZE), Some(offset))
+                .await?;
+
+            if playlists.items.is_empty() {
+                break;
+            }
+
+            if let Some(playlist) = playlists.items.iter().find(preticate) {
+                return Ok(playlist.clone());
+            }
+
+            offset += PAGE_SIZE;
+        }
+
+        Err(Error::NoPlaylistFound)
+    }
+
+    pub async fn archive_discover_weekly(
+        &self,
+        dw_name: impl AsRef<str>,
+        dwa_name: impl AsRef<str>,
+    ) -> Result<PlaylistId> {
+        let dw_id = self.db.get(DBKEY_PLAYLIST_DISCOVERWEEKLY)?;
+        let dw_id = match dw_id.as_deref() {
+            Some(id) => PlaylistId::from_id_or_uri(id)?,
+            None => {
+                let id = self
+                    .find_playlist(|p| {
+                        p.name == dw_name.as_ref()
+                            && p.owner.display_name.as_deref() == Some("Spotify")
+                    })
+                    .await?
+                    .id;
+
+                self.db.set(DBKEY_PLAYLIST_DISCOVERWEEKLY, id.to_string())?;
+
+                id
+            }
+        };
+
+        let dwa_id = self.db.get(DBKEY_PLAYLIST_DISCOVERWEEKLYARCHIVE)?;
+        let dwa_id = match dwa_id.as_deref() {
+            Some(id) => PlaylistId::from_id_or_uri(id)?,
+            None => {
+                let id = self.create_playlist(dwa_name.as_ref(), None).await?.id;
+
+                self.db
+                    .set(DBKEY_PLAYLIST_DISCOVERWEEKLYARCHIVE, id.to_string())?;
+
+                id
+            }
+        };
+
+        let items = self.client.playlist_items(dw_id, None, None);
+        let items: std::result::Result<Vec<_>, _> = items.try_collect().await;
+        let items = items?;
+        let item_ids = items
+            .iter()
+            .cloned()
+            .filter_map(|p| p.track)
+            .filter_map(|t| t.id().as_ref().map(|id| id.clone_static()));
+
+        self.client
+            .playlist_add_items(dwa_id.clone(), item_ids, None)
+            .await?;
+
+        Ok(dwa_id.clone_static())
     }
 }
 

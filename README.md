@@ -55,5 +55,5 @@ When everything is set up correctly, you should be able to navigate to the `/api
 Some Ideas which could be implemented into this project in the future if I am bored again.
 
 - [x] Add query params to `/api/auto/mostplayed` like `playlist_name` or `timespan`
+- [x] Add automation to store all songs in the "Discover Weekly" playlist into one large archival playlist
 - [ ] Add proper handling when the created playlist is deleted
-- [ ] Add automation to store all songs in the "Discover Weekly" playlist into one large archival playlist

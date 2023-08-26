@@ -27,4 +27,7 @@ pub enum Error {
 
     #[error("no authorization token has been stored before")]
     NoTokenStored,
+
+    #[error("no playlist found")]
+    NoPlaylistFound,
 }
