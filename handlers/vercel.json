@@ -15,7 +15,7 @@
     },
     {
       "path": "/api/auto/dwa?dw_name=Discover%20Weekly&dwa_name=Discover%20Weekly%20Archive",
-      "schedule": "9 6 * * TUE"
+      "schedule": "9 6 * * 2"
     }
   ]
 }
