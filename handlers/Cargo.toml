@@ -28,3 +28,7 @@ path = "api/auto/mostplayed.rs"
 [[bin]]
 name = "dwa"
 path = "api/auto/dwa.rs"
+
+[[bin]]
+name = "timerange"
+path = "api/auto/timerange.rs"

@@ -1,4 +1,4 @@
-use std::env::VarError;
+use std::{env::VarError, num::ParseIntError};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -30,4 +30,7 @@ pub enum Error {
 
     #[error("no playlist found")]
     NoPlaylistFound,
+
+    #[error("invalid year: {0}")]
+    InvalidYear(#[from] ParseIntError),
 }

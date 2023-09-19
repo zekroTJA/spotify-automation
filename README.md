@@ -3,8 +3,9 @@
 A small Vercel application to automate some stuff in Spotify.
 
 Currently, this app can do the following stuff.
-- Create playlists containing your recently most played songs *(variants for short, medium and long term)* [`/api/auto/mostplayed`].
+- Create and update playlists containing your recently most played songs *(variants for short, medium and long term)* [`/api/auto/mostplayed`].
 - Archive the contents of your "Discover Weekly" playlist in a separate archival playlist [`/api/auto/dwa`].
+- Create and update playlists containing saved tracks released in a given time range.
 
 ## Setup
 

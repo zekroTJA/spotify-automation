@@ -2,20 +2,22 @@ pub mod errors;
 
 use self::errors::Error;
 use errors::Result;
-use futures::stream::TryStreamExt;
+use futures::{future, stream::TryStreamExt, StreamExt};
 use persistence::KV;
 use rspotify::{
     model::{FullPlaylist, FullTrack, PlaylistId, SimplifiedPlaylist, TimeRange},
     prelude::{BaseClient, OAuthClient, PlayableId},
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
-use std::env;
+use std::{env, ops::Range};
 
 const DBKEY_REFRESH_TOKEN: &str = "spotify_automation_refresh_token";
 const DBKEY_PLAYLIST_MOSTPLAYED_PREFIX: &str = "spotify_automation_playlist_id";
 
 const DBKEY_PLAYLIST_DISCOVERWEEKLY: &str = "spotify_automation_dw_playlist_id";
 const DBKEY_PLAYLIST_DISCOVERWEEKLYARCHIVE: &str = "spotify_automation_dwa_playlist_id";
+
+const DBKEY_PLAYLIST_TIMERANGE_PREFIX: &str = "spotify_automation_timerange_id";
 
 macro_rules! from_env {
     ($name:literal) => {
@@ -48,6 +50,7 @@ impl<DB: KV> UnauthorizedController<DB> {
             redirect_uri,
             scopes: scopes!(
                 "user-top-read",
+                "user-library-read",
                 "playlist-read-private",
                 "playlist-modify-public",
                 "playlist-modify-private"
@@ -286,10 +289,8 @@ impl<DB: KV> AuthorizedController<DB> {
             Some(id) => PlaylistId::from_id_or_uri(id)?,
             None => {
                 let id = self.create_playlist(dwa_name.as_ref(), None).await?.id;
-
                 self.db
                     .set(DBKEY_PLAYLIST_DISCOVERWEEKLYARCHIVE, id.to_string())?;
-
                 id
             }
         };
@@ -309,6 +310,51 @@ impl<DB: KV> AuthorizedController<DB> {
 
         Ok(dwa_id.clone_static())
     }
+
+    pub async fn update_timerange_playlist(
+        &self,
+        year_range: Range<u32>,
+        playlist_name: impl AsRef<str>,
+    ) -> Result<PlaylistId> {
+        let iter = self.client.current_user_saved_tracks(None).filter(|t| {
+            future::ready(t.as_ref().is_ok_and(|t| {
+                t.track
+                    .album
+                    .release_date
+                    .as_ref()
+                    .is_some_and(|date| year(date).is_ok_and(|year| year_range.contains(&year)))
+            }))
+        });
+
+        let items: std::result::Result<Vec<_>, _> = iter.try_collect().await;
+
+        let item_ids = items?
+            .iter()
+            .cloned()
+            .map(|p| p.track)
+            .filter_map(|t| t.id.as_ref().map(|id| id.clone_static()))
+            .map(PlayableId::from)
+            .collect();
+
+        let store_key = format!(
+            "{}:{}-{}",
+            DBKEY_PLAYLIST_TIMERANGE_PREFIX, year_range.start, year_range.end
+        );
+
+        let playlist_id = self.db.get(&store_key)?;
+        let playlist_id = match playlist_id.as_deref() {
+            Some(id) => PlaylistId::from_id_or_uri(id)?,
+            None => {
+                let id = self.create_playlist(playlist_name.as_ref(), None).await?.id;
+                self.db.set(store_key, id.to_string())?;
+                id
+            }
+        };
+
+        self.update_playlist(playlist_id.clone(), item_ids).await?;
+
+        Ok(playlist_id.clone_static())
+    }
 }
 
 fn time_range_from_str<T: AsRef<str>>(v: T) -> Result<TimeRange> {
@@ -326,4 +372,25 @@ fn title(v: &str) -> String {
     }
     let first = v.chars().next().unwrap().to_uppercase();
     format!("{first}{}", &v[1..])
+}
+
+fn year(v: &str) -> Result<u32> {
+    let mut year = v;
+
+    if let Some(idx) = v.chars().position(|c| c == '-') {
+        year = &year[..idx];
+    }
+
+    Ok(year.parse()?)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_year() {
+        assert!(matches!(year("2023"), Ok(v) if v == 2023));
+        assert!(matches!(year("1998-12-12"), Ok(v) if v == 1998));
+    }
 }
