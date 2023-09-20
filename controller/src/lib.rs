@@ -9,7 +9,7 @@ use rspotify::{
     prelude::{BaseClient, OAuthClient, PlayableId},
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
-use std::{env, ops::Range};
+use std::{env, ops::Range, sync::Arc};
 
 const DBKEY_REFRESH_TOKEN: &str = "spotify_automation_refresh_token";
 const DBKEY_PLAYLIST_MOSTPLAYED_PREFIX: &str = "spotify_automation_playlist_id";
@@ -27,12 +27,12 @@ macro_rules! from_env {
 
 pub struct UnauthorizedController<DB: KV> {
     client: AuthCodeSpotify,
-    db: DB,
+    db: Arc<DB>,
 }
 
 pub struct AuthorizedController<DB: KV> {
     client: AuthCodeSpotify,
-    db: DB,
+    db: Arc<DB>,
 }
 
 impl<DB: KV> UnauthorizedController<DB> {
@@ -61,7 +61,10 @@ impl<DB: KV> UnauthorizedController<DB> {
         let creds = Credentials::new(client_id, client_secret);
         let client = AuthCodeSpotify::with_config(creds, oauth, config);
 
-        UnauthorizedController { client, db }
+        UnauthorizedController {
+            client,
+            db: Arc::new(db),
+        }
     }
 
     pub fn from_env(db: DB) -> Result<UnauthorizedController<DB>> {
@@ -80,16 +83,19 @@ impl<DB: KV> UnauthorizedController<DB> {
         Ok(self.client.get_authorize_url(true)?)
     }
 
-    pub async fn authorize_with_code(self, code: &str) -> Result<AuthorizedController<DB>> {
-        self.client.request_token(code).await?;
+    pub async fn authorize_with_code(&self, code: &str) -> Result<AuthorizedController<DB>> {
+        self.client
+            .request_token(code)
+            .await
+            .map_err(|err| Error::AuthorizationFailed(err.into()))?;
 
         Ok(AuthorizedController {
-            client: self.client,
-            db: self.db,
+            client: self.client.clone(),
+            db: self.db.clone(),
         })
     }
 
-    pub async fn authorize_with_token(self, token: String) -> Result<AuthorizedController<DB>> {
+    pub async fn authorize_with_token(&self, token: String) -> Result<AuthorizedController<DB>> {
         let token = Token {
             refresh_token: Some(token),
             ..Default::default()
@@ -105,8 +111,8 @@ impl<DB: KV> UnauthorizedController<DB> {
         self.client.refresh_token().await?;
 
         Ok(AuthorizedController {
-            client: self.client,
-            db: self.db,
+            client: self.client.clone(),
+            db: self.db.clone(),
         })
     }
 
