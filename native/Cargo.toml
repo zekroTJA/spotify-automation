@@ -1,0 +1,15 @@
+[package]
+name = "native"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+controller = { path = "../controller" }
+persistence = { path = "../persistence" }
+figment = { version = "0.10.10", features = ["env"] }
+rocket = { version = "=0.5.0-rc.3", features = ["json"] }
+serde = { version = "1.0.188", features = ["derive"] }
+dotenv = "0.15.0"
+log = "0.4.20"
+env_logger = "0.10.0"
+anyhow = "1.0.75"

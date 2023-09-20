@@ -1,2 +1,2 @@
 [workspace]
-members = ["handlers", "controller", "vercel-utils", "persistence"]
+members = ["handlers", "controller", "vercel-utils", "persistence", "native"]
