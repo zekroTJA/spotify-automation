@@ -7,6 +7,9 @@ pub enum Error {
     #[error("spotify client error: {0}")]
     SpotifyClient(#[from] rspotify::ClientError),
 
+    #[error("spotify authorization failed: {0}")]
+    AuthorizationFailed(Box<dyn std::error::Error + Send + Sync>),
+
     #[error("mutex lock is poisoned")]
     LockPoisoned,
 
