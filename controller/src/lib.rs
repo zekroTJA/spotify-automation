@@ -176,11 +176,19 @@ impl<DB: KV> AuthorizedController<DB> {
             .filter_map(|i| i.id())
             .collect();
 
-        self.client
-            .playlist_remove_all_occurrences_of_items(id.clone(), current_item_ids, None)
-            .await?;
+        for chunks in current_item_ids.chunks(100) {
+            let chunks = chunks.iter().map(|id| id.clone_static());
+            self.client
+                .playlist_remove_all_occurrences_of_items(id.clone_static(), chunks, None)
+                .await?;
+        }
 
-        self.client.playlist_add_items(id, items, None).await?;
+        for chunks in items.chunks(100) {
+            let chunks = chunks.iter().map(|id| id.clone_static());
+            self.client
+                .playlist_add_items(id.clone_static(), chunks, None)
+                .await?;
+        }
 
         Ok(())
     }
