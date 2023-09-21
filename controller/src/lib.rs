@@ -116,7 +116,7 @@ impl<DB: KV> UnauthorizedController<DB> {
         })
     }
 
-    pub async fn authorize_from_db(self) -> Result<AuthorizedController<DB>> {
+    pub async fn authorize_from_db(&self) -> Result<AuthorizedController<DB>> {
         let Some(token) = self.db.get(DBKEY_REFRESH_TOKEN)? else {
             return Err(Error::NoAuthToken);
         };

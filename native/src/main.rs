@@ -3,10 +3,11 @@ extern crate rocket;
 
 mod controllers;
 mod errors;
+mod guards;
 
 use anyhow::Result;
 use controller::UnauthorizedController;
-use controllers::oauth;
+use controllers::{auto, oauth};
 use persistence::redis::Redis;
 
 #[rocket::main]
@@ -23,6 +24,7 @@ async fn main() -> Result<()> {
     rocket::build()
         .manage(controller)
         .mount("/oauth", oauth::routes())
+        .mount("/auto", auto::routes())
         .launch()
         .await?;
 
