@@ -1,12 +1,24 @@
-use crate::{errors::Result, guards::authorized_controller::AuthorizedController};
-use rocket::{http::Status, Route};
+use crate::{
+    config::Config,
+    errors::Result,
+    guards::{auth_token::AuthToken, authorized_controller::AuthorizedController},
+};
+use rocket::{http::Status, Route, State};
 
 #[get("/mostplayed?<time_ranges>&<name>")]
 async fn mostplayed(
+    token: AuthToken<'_>,
+    cfg: &State<Config>,
     controller: AuthorizedController,
     time_ranges: String,
     name: Option<String>,
 ) -> Result<(Status, String)> {
+    if let Some(auth_token) = &cfg.auth_token {
+        if !matches!(token, AuthToken::Bearer(token) if token == auth_token) {
+            return Ok((Status::Unauthorized, "invalid auth token".into()));
+        }
+    }
+
     let time_ranges = time_ranges.split(',').map(str::trim);
     let name = name.as_deref().unwrap_or("Current Top Songs");
 
@@ -19,10 +31,18 @@ async fn mostplayed(
 
 #[get("/dwa?<dw_name>&<dwa_name>")]
 async fn dwa(
+    token: AuthToken<'_>,
+    cfg: &State<Config>,
     controller: AuthorizedController,
     dw_name: Option<String>,
     dwa_name: Option<String>,
 ) -> Result<(Status, String)> {
+    if let Some(auth_token) = &cfg.auth_token {
+        if !matches!(token, AuthToken::Bearer(token) if token == auth_token) {
+            return Ok((Status::Unauthorized, "invalid auth token".into()));
+        }
+    }
+
     let dw_name = dw_name.as_deref().unwrap_or("Discover Weekly");
     let dwa_name = dwa_name.unwrap_or(format!("{dw_name} Archive"));
 
@@ -35,11 +55,19 @@ async fn dwa(
 
 #[get("/timeranges?<name>&<from>&<to>")]
 async fn timeranges(
+    token: AuthToken<'_>,
+    cfg: &State<Config>,
     controller: AuthorizedController,
     name: Option<String>,
     from: u32,
     to: u32,
 ) -> Result<(Status, String)> {
+    if let Some(auth_token) = &cfg.auth_token {
+        if !matches!(token, AuthToken::Bearer(token) if token == auth_token) {
+            return Ok((Status::Unauthorized, "invalid auth token".into()));
+        }
+    }
+
     if from >= to {
         return Ok((
             Status::BadRequest,
