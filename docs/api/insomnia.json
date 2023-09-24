@@ -1,1 +1,234 @@
-{"_type":"export","__export_format":4,"__export_date":"2023-09-24T09:02:26.486Z","__export_source":"insomnia.desktop.app:v2023.5.8","resources":[{"_id":"req_a70d2d8f413041d48cbddaf3cd83fee9","parentId":"fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4","modified":1695545291642,"created":1695543212000,"url":"{{ _.endpoint }}/auto/mostplayed","name":"mostplayed","description":"Creates or updates a playlist containing your top 30 most played songs over a given time range.","method":"GET","body":{},"parameters":[{"id":"pair_feaed4920b7e4714b92b0b82c728e99b","name":"time_ranges","value":"short,medium,long","description":"Exports a playlist for each of the given time ranges (which can be either \"short\", \"medium\" or \"long\".","type":"text","multiline":false},{"id":"pair_a72616909b834cc2a2ec65aa80b7fcf3","name":"name","value":"Playlist Name","description":"The playlist name prefix."}],"headers":[],"authentication":{"type":"bearer","token":"some_token","disabled":false},"metaSortKey":-1695544485649,"isPrivate":false,"settingStoreCookies":true,"settingSendCookies":true,"settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingRebuildPath":true,"settingFollowRedirects":"global","_type":"request"},{"_id":"fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4","parentId":"wrk_3e4583842175492195300040fe23a735","modified":1695543217300,"created":1695543217300,"name":"auto","description":"","environment":{},"environmentPropertyOrder":null,"metaSortKey":-1695543217300,"_type":"request_group"},{"_id":"wrk_3e4583842175492195300040fe23a735","parentId":null,"modified":1695543208931,"created":1695543208931,"name":"spotify-automations","description":"","scope":"collection","_type":"workspace"},{"_id":"req_6653875baf5148979aa65f77ac0efc81","parentId":"fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4","modified":1695544602925,"created":1695544485549,"url":"{{ _.endpoint }}/auto/dwa","name":"dwa","description":"","method":"GET","body":{},"parameters":[{"id":"pair_894b3c4af64e4674996dba1f13aabe28","name":"dw_name","value":"Discover Weekly","description":""},{"id":"pair_d60f53a29b024d19aa617a14d3952cb8","name":"dwa_name","value":"Discover Weekly Archive","description":""}],"headers":[{"name":"User-Agent","value":"insomnia/2023.5.8"}],"authentication":{"type":"bearer","token":"some_token"},"metaSortKey":-1695544485549,"isPrivate":false,"settingStoreCookies":true,"settingSendCookies":true,"settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingRebuildPath":true,"settingFollowRedirects":"global","_type":"request"},{"_id":"req_5ac6c9dcff8e4695bc78d5dacb654fc6","parentId":"fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4","modified":1695544660109,"created":1695544615346,"url":"{{ _.endpoint }}/auto/dwa","name":"timeranges","description":"","method":"GET","body":{},"parameters":[{"name":"from","value":"1990"},{"name":"to","value":"1999"},{"name":"name","value":"Best of 90s"}],"headers":[{"name":"User-Agent","value":"insomnia/2023.5.8"}],"authentication":{"type":"bearer","token":"some_token"},"metaSortKey":-1695266153642.5,"isPrivate":false,"settingStoreCookies":true,"settingSendCookies":true,"settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingRebuildPath":true,"settingFollowRedirects":"global","_type":"request"},{"_id":"env_fac766efaf065d416b4606f71aa722cb24380bc5","parentId":"wrk_3e4583842175492195300040fe23a735","modified":1695543244311,"created":1695543208937,"name":"Base Environment","data":{"endpoint":"http://127.0.0.1:8081"},"dataPropertyOrder":{"&":["endpoint"]},"color":null,"isPrivate":false,"metaSortKey":1695543208937,"_type":"environment"},{"_id":"jar_fac766efaf065d416b4606f71aa722cb24380bc5","parentId":"wrk_3e4583842175492195300040fe23a735","modified":1695543208939,"created":1695543208939,"name":"Default Jar","cookies":[],"_type":"cookie_jar"}]}
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2023-09-24T09:16:13.505Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_a70d2d8f413041d48cbddaf3cd83fee9",
+      "parentId": "fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4",
+      "modified": 1695545291642,
+      "created": 1695543212000,
+      "url": "{{ _.endpoint }}/auto/mostplayed",
+      "name": "mostplayed",
+      "description": "Creates or updates a playlist containing your top 30 most played songs over a given time range.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_feaed4920b7e4714b92b0b82c728e99b",
+          "name": "time_ranges",
+          "value": "short,medium,long",
+          "description": "Exports a playlist for each of the given time ranges (which can be either \"short\", \"medium\" or \"long\".",
+          "type": "text",
+          "multiline": false
+        },
+        {
+          "id": "pair_a72616909b834cc2a2ec65aa80b7fcf3",
+          "name": "name",
+          "value": "Playlist Name",
+          "description": "The playlist name prefix."
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "some_token",
+        "disabled": false
+      },
+      "metaSortKey": -1695544485649,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4",
+      "parentId": "wrk_3e4583842175492195300040fe23a735",
+      "modified": 1695543217300,
+      "created": 1695543217300,
+      "name": "auto",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1695543217300,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_3e4583842175492195300040fe23a735",
+      "parentId": null,
+      "modified": 1695543208931,
+      "created": 1695543208931,
+      "name": "spotify-automations",
+      "description": "",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_6653875baf5148979aa65f77ac0efc81",
+      "parentId": "fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4",
+      "modified": 1695546562250,
+      "created": 1695544485549,
+      "url": "{{ _.endpoint }}/auto/dwa",
+      "name": "dwa",
+      "description": "Takes all songs fron your Discover Weekly playlist and dumps them into a new playlist. Running this every week, you can create an archive of all songs which have been in your Discover Weekly.\n\nYou can define the name of your Discover Weekly playlist with the `dw_name` query parameter because it might differ between account languages (e.g. in English it is called \"Discover Weekly\" but in German it is \"Dein Mix der Woche\").",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_894b3c4af64e4674996dba1f13aabe28",
+          "name": "dw_name",
+          "value": "Discover Weekly",
+          "description": "The name of the Discover Weekly playlist to be archived."
+        },
+        {
+          "id": "pair_d60f53a29b024d19aa617a14d3952cb8",
+          "name": "dwa_name",
+          "value": "Discover Weekly Archive",
+          "description": "The name of the archival playlist."
+        }
+      ],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/2023.5.8" }],
+      "authentication": { "type": "bearer", "token": "some_token" },
+      "metaSortKey": -1695544485549,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_5ac6c9dcff8e4695bc78d5dacb654fc6",
+      "parentId": "fld_8e610c4ac9cf4cc8b486a7c8b07fe2f4",
+      "modified": 1695546793409,
+      "created": 1695544615346,
+      "url": "{{ _.endpoint }}/auto/timeranges",
+      "name": "timeranges",
+      "description": "When activated, your saved songs are filtered by album release date in the given `from` to `to` year range and then dumped into a playlist with the given `name`.\n\nRunning this endpoint might take up to several seconds depending on the amount of your saved songs. ",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "from",
+          "value": "1990",
+          "id": "pair_e37864430cd2446a979f0e5aaeb7b989"
+        },
+        {
+          "name": "to",
+          "value": "2000",
+          "id": "pair_8fbee43c81c1480f9127b034a79b14c1"
+        },
+        {
+          "name": "name",
+          "value": "Best of 90s",
+          "id": "pair_85da16e1d63c4437bd0b4ab3f567df64"
+        }
+      ],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/2023.5.8" }],
+      "authentication": { "type": "bearer", "token": "some_token" },
+      "metaSortKey": -1695266153642.5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_dbc1bf0f186a4b178c79b3f31dedc567",
+      "parentId": "fld_98b85331c4ab46169f657d223253fcb2",
+      "modified": 1695546846155,
+      "created": 1695546807209,
+      "url": "{{ _.endpoint }}/oauth/login",
+      "name": "login",
+      "description": "Redirects to the Spotify OAuth2 login endpoint.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/2023.5.8" }],
+      "authentication": {},
+      "metaSortKey": -1695546807209,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_98b85331c4ab46169f657d223253fcb2",
+      "parentId": "wrk_3e4583842175492195300040fe23a735",
+      "modified": 1695546805075,
+      "created": 1695546805075,
+      "name": "oauth",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1695546805075,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_fbcde6fda9f3442da5484ae6830c71ac",
+      "parentId": "fld_98b85331c4ab46169f657d223253fcb2",
+      "modified": 1695546952217,
+      "created": 1695546851746,
+      "url": "{{ _.endpoint }}/oauth/callback",
+      "name": "callback",
+      "description": "When logging in using the `GET /oauth/login` endpoint, the Spotify OAuth2 login server will redirect you to this endpoint with a `code` to fullfill the OAuth2 authentication flow.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "id": "pair_e3b930dc946b4257956f4499d7fe8ca9",
+          "name": "code",
+          "value": "auth_code_from_spotify",
+          "description": "The OAuth2 authorization code form the Spotify login server."
+        }
+      ],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/2023.5.8" }],
+      "authentication": {},
+      "metaSortKey": -1695546807109,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "env_fac766efaf065d416b4606f71aa722cb24380bc5",
+      "parentId": "wrk_3e4583842175492195300040fe23a735",
+      "modified": 1695543244311,
+      "created": 1695543208937,
+      "name": "Base Environment",
+      "data": { "endpoint": "http://127.0.0.1:8081" },
+      "dataPropertyOrder": { "&": ["endpoint"] },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1695543208937,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_fac766efaf065d416b4606f71aa722cb24380bc5",
+      "parentId": "wrk_3e4583842175492195300040fe23a735",
+      "modified": 1695546825715,
+      "created": 1695543208939,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    }
+  ]
+}
