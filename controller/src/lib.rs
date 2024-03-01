@@ -140,10 +140,15 @@ impl<DB: KV> AuthorizedController<DB> {
         Ok(())
     }
 
-    pub async fn get_top_songs(&self, time_range: Option<TimeRange>) -> Result<Vec<FullTrack>> {
+    pub async fn get_top_songs(
+        &self,
+        time_range: Option<TimeRange>,
+        limit: Option<usize>,
+    ) -> Result<Vec<FullTrack>> {
         let top_tracks = self.client.current_user_top_tracks(time_range);
 
-        let tracks: std::result::Result<Vec<_>, _> = top_tracks.try_collect().await;
+        let tracks: std::result::Result<Vec<_>, _> =
+            top_tracks.take(limit.unwrap_or(100)).try_collect().await;
 
         Ok(tracks?)
     }
@@ -198,6 +203,7 @@ impl<DB: KV> AuthorizedController<DB> {
         id: Option<&'a str>,
         name: &str,
         time_range: Option<T>,
+        limit: Option<usize>,
     ) -> Result<PlaylistId> {
         let time_range = time_range.map(time_range_from_str).transpose()?;
 
@@ -207,7 +213,7 @@ impl<DB: KV> AuthorizedController<DB> {
         };
 
         let top_songs = self
-            .get_top_songs(time_range)
+            .get_top_songs(time_range, limit)
             .await?
             .iter()
             .cloned()
@@ -224,6 +230,7 @@ impl<DB: KV> AuthorizedController<DB> {
         &self,
         time_ranges: I,
         name_prefix: N,
+        limit: Option<usize>,
     ) -> Result<Vec<String>>
     where
         I: Iterator<Item = E>,
@@ -239,7 +246,12 @@ impl<DB: KV> AuthorizedController<DB> {
             let playlist_name = format!("{} ({} Term)", name_prefix.as_ref(), title(time_range));
 
             let id = self
-                .update_top_songs_playlist(playlist_id.as_deref(), &playlist_name, Some(time_range))
+                .update_top_songs_playlist(
+                    playlist_id.as_deref(),
+                    &playlist_name,
+                    Some(time_range),
+                    limit,
+                )
                 .await?;
 
             ids.push(id.to_string());

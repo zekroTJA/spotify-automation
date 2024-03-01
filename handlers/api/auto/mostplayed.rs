@@ -1,7 +1,7 @@
 use controller::UnauthorizedController;
 use persistence::redis::Redis;
 use vercel_runtime::{http, run, Body, Error, Request, Response, StatusCode};
-use vercel_utils::{expect, get_query_param};
+use vercel_utils::{expect, get_query_param, get_query_param_parsed};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -11,6 +11,7 @@ async fn main() -> Result<(), Error> {
 pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     let time_ranges = expect!(get_query_param(&req, "time_ranges")).unwrap_or("short".into());
     let name = expect!(get_query_param(&req, "name"));
+    let limit: Option<usize> = expect!(get_query_param_parsed(&req, "limit"));
 
     let db = expect!(Redis::from_env(true));
     let controller = expect!(UnauthorizedController::from_env(db));
@@ -24,7 +25,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         controller
             .update_mostplayed_playlists(
                 time_ranges,
-                name.as_deref().unwrap_or("Current Top Songs")
+                name.as_deref().unwrap_or("Current Top Songs"),
+                limit,
             )
             .await
     );

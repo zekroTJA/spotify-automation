@@ -5,13 +5,14 @@ use crate::{
 };
 use rocket::{http::Status, Route, State};
 
-#[get("/mostplayed?<time_ranges>&<name>")]
+#[get("/mostplayed?<time_ranges>&<name>&<limit>")]
 async fn mostplayed(
     token: AuthToken<'_>,
     cfg: &State<Config>,
     controller: AuthorizedController,
     time_ranges: String,
     name: Option<String>,
+    limit: Option<usize>,
 ) -> Result<(Status, String)> {
     if let Some(auth_token) = &cfg.auth_token {
         if !matches!(token, AuthToken::Bearer(token) if token == auth_token) {
@@ -23,7 +24,7 @@ async fn mostplayed(
     let name = name.as_deref().unwrap_or("Current Top Songs");
 
     let ids = controller
-        .update_mostplayed_playlists(time_ranges, name)
+        .update_mostplayed_playlists(time_ranges, name, limit)
         .await?;
 
     Ok((Status::Ok, format!("updated playlists: {}", ids.join(", "))))

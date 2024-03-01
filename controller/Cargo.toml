@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 persistence = { path = "../persistence" }
 futures = "0.3.28"
-rspotify = "0.11.7"
+rspotify = "0.12.0"
 thiserror = "1.0.47"
