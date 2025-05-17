@@ -2,14 +2,15 @@ pub mod errors;
 
 use self::errors::Error;
 use errors::Result;
-use futures::{future, stream::TryStreamExt, StreamExt};
+use futures::stream::TryStreamExt;
+use futures::{future, StreamExt};
 use persistence::KV;
-use rspotify::{
-    model::{FullPlaylist, FullTrack, PlaylistId, SimplifiedPlaylist, TimeRange},
-    prelude::{BaseClient, OAuthClient, PlayableId},
-    scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
-};
-use std::{env, ops::Range, sync::Arc};
+use rspotify::model::{FullPlaylist, FullTrack, PlaylistId, SimplifiedPlaylist, TimeRange};
+use rspotify::prelude::{BaseClient, OAuthClient, PlayableId};
+use rspotify::{scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token};
+use std::env;
+use std::ops::Range;
+use std::sync::Arc;
 
 const DBKEY_REFRESH_TOKEN: &str = "spotify_automation_refresh_token";
 const DBKEY_PLAYLIST_MOSTPLAYED_PREFIX: &str = "spotify_automation_playlist_id";
@@ -204,7 +205,7 @@ impl<DB: KV> AuthorizedController<DB> {
         name: &str,
         time_range: Option<T>,
         limit: Option<usize>,
-    ) -> Result<PlaylistId> {
+    ) -> Result<PlaylistId<'a>> {
         let time_range = time_range.map(time_range_from_str).transpose()?;
 
         let playlist_id: PlaylistId<'a> = match id {
@@ -241,7 +242,7 @@ impl<DB: KV> AuthorizedController<DB> {
 
         for time_range in time_ranges {
             let time_range = time_range.as_ref();
-            let store_key = format!("{}:{}", DBKEY_PLAYLIST_MOSTPLAYED_PREFIX, time_range);
+            let store_key = format!("{DBKEY_PLAYLIST_MOSTPLAYED_PREFIX}:{time_range}");
             let playlist_id = self.db.get(store_key)?;
             let playlist_name = format!("{} ({} Term)", name_prefix.as_ref(), title(time_range));
 

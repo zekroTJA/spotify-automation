@@ -1,9 +1,9 @@
-use crate::{
-    config::Config,
-    errors::Result,
-    guards::{auth_token::AuthToken, authorized_controller::AuthorizedController},
-};
-use rocket::{http::Status, Route, State};
+use crate::config::Config;
+use crate::errors::Result;
+use crate::guards::auth_token::AuthToken;
+use crate::guards::authorized_controller::AuthorizedController;
+use rocket::http::Status;
+use rocket::{Route, State};
 
 #[get("/mostplayed?<time_ranges>&<name>&<limit>")]
 async fn mostplayed(

@@ -1,6 +1,5 @@
-use crate::KV;
-
 use super::errors::{Error, Result};
+use crate::KV;
 use redis::{Client, Commands};
 use std::env;
 

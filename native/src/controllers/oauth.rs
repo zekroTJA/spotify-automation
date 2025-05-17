@@ -1,8 +1,9 @@
+use crate::errors::Result;
 use controller::UnauthorizedController;
 use persistence::redis::Redis;
-use rocket::{http::Status, response::Redirect, Route, State};
-
-use crate::errors::Result;
+use rocket::http::Status;
+use rocket::response::Redirect;
+use rocket::{Route, State};
 
 #[get("/login")]
 async fn login(controller: &State<UnauthorizedController<Redis>>) -> Result<Redirect> {

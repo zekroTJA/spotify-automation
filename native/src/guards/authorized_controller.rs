@@ -1,12 +1,9 @@
-use std::ops::Deref;
-
 use controller::UnauthorizedController;
 use persistence::redis::Redis;
-use rocket::{
-    http::Status,
-    request::{FromRequest, Outcome},
-    Request, State,
-};
+use rocket::http::Status;
+use rocket::request::{FromRequest, Outcome};
+use rocket::{Request, State};
+use std::ops::Deref;
 
 pub struct AuthorizedController(controller::AuthorizedController<Redis>);
 

@@ -32,7 +32,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         Err(err) if matches!(err, controller::errors::Error::NoAuthToken) => http::bad_request("no authorization token stored"),
         Err(err) => http::internal_server_error(err.to_string()));
 
-    let name = name.unwrap_or_else(|| format!("Songs from {} to {}", from, to));
+    let name = name.unwrap_or_else(|| format!("Songs from {from} to {to}"));
     let id = expect!(controller.update_timerange_playlist(from..to, name).await);
 
     Ok(Response::builder()

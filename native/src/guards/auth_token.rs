@@ -1,7 +1,5 @@
-use rocket::{
-    request::{FromRequest, Outcome},
-    Request,
-};
+use rocket::request::{FromRequest, Outcome};
+use rocket::Request;
 
 pub enum AuthToken<'r> {
     None,
