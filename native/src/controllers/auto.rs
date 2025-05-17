@@ -30,30 +30,6 @@ async fn mostplayed(
     Ok((Status::Ok, format!("updated playlists: {}", ids.join(", "))))
 }
 
-#[get("/dwa?<dw_name>&<dwa_name>")]
-async fn dwa(
-    token: AuthToken<'_>,
-    cfg: &State<Config>,
-    controller: AuthorizedController,
-    dw_name: Option<String>,
-    dwa_name: Option<String>,
-) -> Result<(Status, String)> {
-    if let Some(auth_token) = &cfg.auth_token {
-        if !matches!(token, AuthToken::Bearer(token) if token == auth_token) {
-            return Ok((Status::Unauthorized, "invalid auth token".into()));
-        }
-    }
-
-    let dw_name = dw_name.as_deref().unwrap_or("Discover Weekly");
-    let dwa_name = dwa_name.unwrap_or(format!("{dw_name} Archive"));
-
-    let id = controller
-        .archive_discover_weekly(dw_name, dwa_name)
-        .await?;
-
-    Ok((Status::Ok, format!("updated playlist: {id}")))
-}
-
 #[get("/timeranges?<name>&<from>&<to>")]
 async fn timeranges(
     token: AuthToken<'_>,
@@ -76,7 +52,7 @@ async fn timeranges(
         ));
     }
 
-    let name = name.unwrap_or_else(|| format!("Songs from {} to {}", from, to));
+    let name = name.unwrap_or_else(|| format!("Songs from {from} to {to}"));
 
     let id = controller.update_timerange_playlist(from..to, name).await?;
 
@@ -84,5 +60,5 @@ async fn timeranges(
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![mostplayed, dwa, timeranges]
+    routes![mostplayed, timeranges]
 }

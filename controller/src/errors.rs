@@ -35,6 +35,9 @@ pub enum Error {
     #[error("no playlist found")]
     NoPlaylistFound,
 
+    #[error("playlist by id doesn ot exist")]
+    PlaylistDoesNotExist,
+
     #[error("invalid year: {0}")]
     InvalidYear(#[from] ParseIntError),
 }
