@@ -1,6 +1,7 @@
 use rocket::request::{FromRequest, Outcome};
 use rocket::Request;
 
+#[allow(dead_code)]
 pub enum AuthToken<'r> {
     None,
     Basic(&'r str),
